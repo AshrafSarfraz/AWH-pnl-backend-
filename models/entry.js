@@ -1,11 +1,20 @@
 const mongoose = require("mongoose");
 
-const entrySchema = new mongoose.Schema({
-  subCategoryId: { type: mongoose.Schema.Types.ObjectId, ref: "SubCategory", required: true },
-  budget: { type: Number, required: true },
-  actual: { type: Number, required: true },
-  month: { type: String, required: true },
+const EntrySchema = new mongoose.Schema({
+  createdBy: { type: String, required: true },
+  companyId: { type: String, required: true },
+  type: { type: String, required: true },
+  categoryId: { type: String, required: true }, 
+  subCategoryId: { type: String, required: true },
   year: { type: Number, required: true },
+  entries: [
+    {
+      month: { type: Number, required: true },
+      budget: { type: Number, required: true },
+      actual: { type: Number, required: true }
+    }
+  ]
 });
 
-module.exports = mongoose.model("Entry", entrySchema);
+const Entry = mongoose.model("Entry", EntrySchema);
+module.exports = Entry;

@@ -21,6 +21,9 @@ app.use("/company", require("./routes/company_route"));
 app.use("/category", require("./routes/category_route"));
 app.use("/subcategory", require("./routes/sub_category_route"));
 app.use("/entry", require("./routes/entry_route"));
+app.use("/ceo/dashboard", require("./routes/ceo_route"));
+
+
 
 app.use('/', userRoute);
 

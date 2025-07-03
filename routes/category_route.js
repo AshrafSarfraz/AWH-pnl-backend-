@@ -43,4 +43,55 @@ router.get("/:companyId", async (req, res) => {
   }
 });
 
+
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, type } = req.body;
+
+  if (!name && !type) {
+    return res.status(400).json({ success: false, error: "Nothing to update" });
+  }
+
+  if (type && !["revenue", "expense"].includes(type)) {
+    return res.status(400).json({ success: false, error: "Invalid category type" });
+  }
+
+  try {
+    const updatedCategory = await Category.findByIdAndUpdate(
+      id,
+      { $set: { ...(name && { name }), ...(type && { type }) } },
+      { new: true } // return updated doc
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({ success: false, error: "Category not found" });
+    }
+
+    res.status(200).json({ success: true, category: updatedCategory });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
+
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedCategory = await Category.findByIdAndDelete(id);
+
+    if (!deletedCategory) {
+      return res.status(404).json({ success: false, error: "Category not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Category deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
+
+
 module.exports = router;
