@@ -99,31 +99,32 @@ app.post("/", async (req, res) => {
       return res.status(400).json({ message: "Please provide both entryId and entryItemId" });
     }
 
-    // Entry document dhundo by _id
+    // Step 1: Find the parent document directly using entryId
     const entryDoc = await Entry.findById(entryId);
-
     if (!entryDoc) {
-      return res.status(404).json({ message: "Entry document not found" });
+      return res.status(404).json({ message: "Parent entry document not found" });
     }
 
-    // entries array me se wo item hatao jiska _id match kare
+    // Step 2: Filter out the sub-entry to be deleted
     const filteredEntries = entryDoc.entries.filter(
       (e) => e._id.toString() !== entryItemId
     );
 
+    // If no item was removed (entryItemId not found)
     if (filteredEntries.length === entryDoc.entries.length) {
       return res.status(404).json({ message: "Entry item to delete not found" });
     }
 
+    // Step 3: Update entries array
     entryDoc.entries = filteredEntries;
 
-    // Agar ab entries khali ho gayi hain, to poora document bhi delete kar do
+    // Step 4: Delete the whole parent document if entries is now empty
     if (entryDoc.entries.length === 0) {
       await Entry.deleteOne({ _id: entryId });
       return res.status(200).json({ message: "Entry item deleted. No entries left, document removed." });
     }
 
-    // Nahi to sirf update kar do entries
+    // Step 5: Save updated document
     await entryDoc.save();
 
     return res.status(200).json({ message: "Entry item deleted successfully", data: entryDoc });
@@ -134,7 +135,6 @@ app.post("/", async (req, res) => {
   }
 });
 
- 
 
 
 // 2. Get and Sum all entries for a subCategoryId (table data)
@@ -143,18 +143,14 @@ app.get("/full/:subCategoryId", async (req, res) => {
     const { subCategoryId } = req.params;
     const yearQuery = req.query.year ? parseInt(req.query.year) : null;
 
-    // Step 1: Get data filtered by year if given, else all years
     const filter = { subCategoryId };
     if (yearQuery) filter.year = yearQuery;
 
     const allEntries = await Entry.find(filter).sort({ year: -1 });
 
-    // Step 2: Prepare full table rows
     const tableData = [];
-
     let overallBudget = 0;
     let overallActual = 0;
-
     const yearlySummary = [];
 
     for (const entry of allEntries) {
@@ -166,7 +162,9 @@ app.get("/full/:subCategoryId", async (req, res) => {
           year: entry.year,
           month: monthEntry.month,
           budget: monthEntry.budget,
-          actual: monthEntry.actual
+          actual: monthEntry.actual,
+          _id: monthEntry._id,        // 👈 add entry item ID
+          entryId: entry._id          // 👈 optional: parent document ID
         });
 
         overallBudget += monthEntry.budget;
@@ -199,6 +197,7 @@ app.get("/full/:subCategoryId", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 // 2. Get and sum Data for entries  by using CategoryId (all Sub-categories are under categories data)
 app.get("/category/:categoryId/full", async (req, res) => {

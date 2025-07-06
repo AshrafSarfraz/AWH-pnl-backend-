@@ -12,7 +12,8 @@ const EntrySchema = new mongoose.Schema({
       month: { type: Number, required: true },
       budget: { type: Number, required: true },
       actual: { type: Number, required: true }
-    }
+    },
+    { _id: true } // ensure Mongoose generates ObjectId for each entry
   ]
 });
 
