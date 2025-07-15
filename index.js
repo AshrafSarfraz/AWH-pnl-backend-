@@ -1,4 +1,5 @@
 
+
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -23,7 +24,8 @@ app.use("/subcategory", require("./routes/sub_category_route"));
 app.use("/entry", require("./routes/entry_route"));
 app.use("/ceo/dashboard", require("./routes/ceo_route"));
 
-
+// for hr system to get data from mongoDb that we use in our application
+app.use("/employees", require("./HR-SystemApi/get_Data_from_mongo"));
 
 app.use('/', userRoute);
 
@@ -35,3 +37,5 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
+
+
